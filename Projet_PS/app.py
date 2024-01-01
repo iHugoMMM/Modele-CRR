@@ -72,10 +72,10 @@ class BinomialTreeApp:
         ttk.Button(buttons_frame, text="Afficher l'arbre", command=self.display_tree).grid(row=0, column=0, pady=(0, 10))
 
         # Bouton pour calculer le Put
-        ttk.Button(buttons_frame, text="Calculer le Put", command=self.calculate_put).grid(row=1, column=0, pady=5)
+        ttk.Button(buttons_frame, text="Calcul : Put", command=self.calculate_put).grid(row=1, column=0, pady=5)
 
         # Bouton pour calculer le Call
-        ttk.Button(buttons_frame, text="Calculer le Call", command=self.calculate_call).grid(row=2, column=0, pady=(5, 0))
+        ttk.Button(buttons_frame, text="Calcul : Call", command=self.calculate_call).grid(row=2, column=0, pady=(5, 0))
 
         # Quart inférieur gauche: Arbre
         tree_frame = ttk.Frame(main_frame)
