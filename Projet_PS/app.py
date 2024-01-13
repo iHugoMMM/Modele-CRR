@@ -26,7 +26,7 @@ class BinomialTreeApp:
         y = (screen_height - 600) // 2  # Ajustez la hauteur de la fenêtre selon vos besoins
 
         # Définissez la géométrie de la fenêtre
-        self.root.geometry(f"300x300+{x}+{y}")
+        self.root.geometry(f"345x285+{x}+{y}")
 
         # Configurez la couleur de fond de la fenêtre principale
         style = ttk.Style()
@@ -82,8 +82,14 @@ class BinomialTreeApp:
         # Bouton pour calculer le Call
         ttk.Button(buttons_frame, text="Calcul : Call", command=self.calculate_call).grid(row=2, column=0, pady=(5, 0))
 
-        # Bouton pour afficher le graphique de convergence
-        ttk.Button(buttons_frame, text="Afficher Convergence", command=self.display_convergence_graph).grid(row=3, column=0, pady=(5, 0))
+        # Bouton pour afficher le graphique de convergence du Call
+        ttk.Button(buttons_frame, text="Afficher Convergence Call", command=self.display_convergence_graph).grid(row=3, column=0, pady=(5, 0))
+
+        # Bouton pour afficher le graphique de convergence du Put
+        ttk.Button(buttons_frame, text="Afficher Convergence Put", command=self.display_convergence_graph_put).grid(row=4, column=0, pady=(5, 0))
+
+        # Bouton pour afficher le graphique complet de convergence
+        ttk.Button(buttons_frame, text="Graph complet", command=self.display_full_convergence_graph).grid(row=5, column=0, pady=(5, 0))
 
         # Quart inférieur gauche: Arbre
         tree_frame = ttk.Frame(main_frame)
@@ -115,9 +121,39 @@ class BinomialTreeApp:
         if values is not None:
             S0, T, r, sigma, K, n = values
             convergence_graph = ConvergenceGraph(S0, K, r, sigma, T)
-            N_values = np.arange(10, n + 101, 1)  # Ajustez la plage des valeurs N selon vos besoins
+            N_values = np.arange(10, n + 101, 1) 
             convergence_graph.plot_convergence_graph(N_values)
 
+    def display_convergence_graph_put(self):
+        values = self.get_input_values()
+        if values is not None:
+            S0, T, r, sigma, K, n = values
+            convergence_graph_put = ConvergenceGraph(S0, K, r, sigma, T)
+            N_values = np.arange(10, n + 101, 1) 
+            convergence_graph_put.plot_convergence_graph_put(N_values)
+
+    def display_full_convergence_graph(self):
+        values = self.get_input_values()
+        if values is not None:
+            S0, T, r, sigma, K, n = values
+            convergence_graph = ConvergenceGraph(S0, K, r, sigma, T)
+
+            N_values = np.arange(10, n + 101, 1)
+            
+            # Calcul de la convergence pour le Call
+            call_prices = [convergence_graph.crr_option_price(N, 'call') for N in N_values]
+
+            # Calcul de la convergence pour le Put
+            put_prices = [convergence_graph.crr_option_price(N, 'put') for N in N_values]
+
+            # Tracé du graphique de convergence complet
+            plt.plot(N_values, call_prices, label='Convergence Call')
+            plt.plot(N_values, put_prices, label='Convergence Put')
+            plt.xlabel('Nombre de périodes (N)')
+            plt.ylabel('Prix de l\'option')
+            plt.title('Convergence du modèle CRR pour Call et Put')
+            plt.legend()
+            plt.show()
 
     def display_tree(self):
         """Fonction pour afficher l'arbre."""

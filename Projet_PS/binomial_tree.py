@@ -184,7 +184,7 @@ class ConvergenceGraph:
         self.sigma = sigma
         self.T = T
 
-    def crr_option_price(self, N):
+    def crr_option_price(self, N, option_type):
         dt = self.T / N
         u = np.exp(self.sigma * np.sqrt(dt))
         d = 1 / u
@@ -199,7 +199,10 @@ class ConvergenceGraph:
                 stock_prices[j, i] = self.S0 * (u ** (i-j)) * (d ** j)
 
         # Calcul des prix de l'option à l'échéance
-        option_prices[:, N] = np.maximum(stock_prices[:, N] - self.K, 0)
+        if option_type == 'call':
+            option_prices[:, N] = np.maximum(stock_prices[:, N] - self.K, 0)
+        elif option_type == 'put':
+            option_prices[:, N] = np.maximum(self.K - stock_prices[:, N], 0)
 
         # Calcul récursif des prix de l'option du dernier nœud à l'instant initial
         for i in range(N-1, -1, -1):
@@ -208,13 +211,26 @@ class ConvergenceGraph:
 
         return option_prices[0, 0]
 
-    def plot_convergence_graph(self, N_values):
-        crr_prices = [self.crr_option_price(N) for N in N_values]
+    def plot_convergence_graph(self, N_values, option_type='call'):
+        crr_prices = [self.crr_option_price(N, option_type) for N in N_values]
 
         # Tracé du graphique de convergence
-        plt.plot(N_values, crr_prices, label='Modèle CRR')
+        option_name = 'Call' if option_type == 'call' else 'Put'
+        plt.plot(N_values, crr_prices, label=f'Modèle CRR - {option_name}')
         plt.xlabel('Nombre de périodes (N)')
-        plt.ylabel('Prix de l\'option')
-        plt.title('Convergence du modèle CRR')
+        plt.ylabel(f'Prix de l\'option {option_name}')
+        plt.title(f'Convergence du modèle CRR pour {option_name}')
+        plt.legend()
+        plt.show()
+
+    def plot_convergence_graph_put(self, N_values, option_type='put'):
+        crr_prices = [self.crr_option_price(N, option_type) for N in N_values]
+
+        # Tracé du graphique de convergence
+        option_name = 'Call' if option_type == 'call' else 'Put'
+        plt.plot(N_values, crr_prices, label=f'Modèle CRR - {option_name}')
+        plt.xlabel('Nombre de périodes (N)')
+        plt.ylabel(f'Prix de l\'option {option_name}')
+        plt.title(f'Convergence du modèle CRR pour {option_name}')
         plt.legend()
         plt.show()
