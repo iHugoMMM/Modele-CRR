@@ -4,19 +4,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class BinomialTree:
-    def __init__(self, S0, T, r, u, K, n):
+    def __init__(self, S0, T, r, sigma, K, n):
         self.S0 = S0
         self.T = T
         self.r = r
-        # self.sigma = sigma
+        self.sigma = sigma
         self.K = K
         self.n = n
-        # self.u = np.exp(sigma * np.sqrt(T / n))
-        self.u = u
+        self.u = np.exp(sigma * np.sqrt(T / n))
         self.d = 1 / self.u
-        # avec sigma
-        # self.p = (np.exp(r * T / n) - self.d) / (self.u - self.d) # Probabilité risque neutre
-        self.p = (1 + self.r - self.d) / (self.u - self.d) # Probabilité risque neutre
+        self.p = (np.exp(r * T / n) - self.d) / (self.u - self.d) # Probabilité risque neutre
         self.stock_tree = np.zeros((n + 1, n + 1))
         self.call_payoffs = np.zeros((n + 1, n + 1))
         self.put_payoffs = np.zeros((n + 1, n + 1))
@@ -177,4 +174,47 @@ class BinomialTreeAM:
         plt.ylim(-self.n - 2.5, 1)
         plt.gca().invert_yaxis()
         plt.axis("off")
+        plt.show()
+
+class ConvergenceGraph:
+    def __init__(self, S0, K, r, sigma, T):
+        self.S0 = S0
+        self.K = K
+        self.r = r
+        self.sigma = sigma
+        self.T = T
+
+    def crr_option_price(self, N):
+        dt = self.T / N
+        u = np.exp(self.sigma * np.sqrt(dt))
+        d = 1 / u
+        p = (np.exp(self.r * dt) - d) / (u - d)
+
+        stock_prices = np.zeros((N+1, N+1))
+        option_prices = np.zeros((N+1, N+1))
+
+        # Calcul des prix de l'actif sous-jacent à chaque nœud
+        for i in range(N+1):
+            for j in range(i+1):
+                stock_prices[j, i] = self.S0 * (u ** (i-j)) * (d ** j)
+
+        # Calcul des prix de l'option à l'échéance
+        option_prices[:, N] = np.maximum(stock_prices[:, N] - self.K, 0)
+
+        # Calcul récursif des prix de l'option du dernier nœud à l'instant initial
+        for i in range(N-1, -1, -1):
+            for j in range(i+1):
+                option_prices[j, i] = np.exp(-self.r * dt) * (p * option_prices[j, i+1] + (1 - p) * option_prices[j+1, i+1])
+
+        return option_prices[0, 0]
+
+    def plot_convergence_graph(self, N_values):
+        crr_prices = [self.crr_option_price(N) for N in N_values]
+
+        # Tracé du graphique de convergence
+        plt.plot(N_values, crr_prices, label='Modèle CRR')
+        plt.xlabel('Nombre de périodes (N)')
+        plt.ylabel('Prix de l\'option')
+        plt.title('Convergence du modèle CRR')
+        plt.legend()
         plt.show()

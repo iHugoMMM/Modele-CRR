@@ -7,6 +7,7 @@ import decimal
 import numpy as np
 import matplotlib.pyplot as plt
 from binomial_tree import BinomialTree
+from binomial_tree import ConvergenceGraph
 
 class BinomialTreeApp:
     """Classe principale de l'application. 
@@ -56,9 +57,9 @@ class BinomialTreeApp:
         self.r_entry = ttk.Entry(inputs_frame)
         self.r_entry.grid(row=2, column=1)
 
-        ttk.Label(inputs_frame, text="u:").grid(row=3, column=0, sticky="w")
-        self.u_entry = ttk.Entry(inputs_frame)
-        self.u_entry.grid(row=3, column=1)
+        ttk.Label(inputs_frame, text="sigma:").grid(row=3, column=0, sticky="w")
+        self.sigma_entry = ttk.Entry(inputs_frame)
+        self.sigma_entry.grid(row=3, column=1)
 
         ttk.Label(inputs_frame, text="K:").grid(row=4, column=0, sticky="w")
         self.K_entry = ttk.Entry(inputs_frame)
@@ -81,6 +82,9 @@ class BinomialTreeApp:
         # Bouton pour calculer le Call
         ttk.Button(buttons_frame, text="Calcul : Call", command=self.calculate_call).grid(row=2, column=0, pady=(5, 0))
 
+        # Bouton pour afficher le graphique de convergence
+        ttk.Button(buttons_frame, text="Afficher Convergence", command=self.display_convergence_graph).grid(row=3, column=0, pady=(5, 0))
+
         # Quart inférieur gauche: Arbre
         tree_frame = ttk.Frame(main_frame)
         tree_frame.grid(row=1, column=0, sticky="nsew")
@@ -96,22 +100,31 @@ class BinomialTreeApp:
             S0 = float(self.S0_entry.get())
             T = float(self.T_entry.get())
             r = float(self.r_entry.get())
-            u = float(self.u_entry.get())
+            sigma = float(self.sigma_entry.get())
             K = float(self.K_entry.get())
             n = int(self.n_entry.get())
 
-            return S0, T, r, u, K, n
+            return S0, T, r, sigma, K, n
 
         except ValueError:
             messagebox.showerror("Erreur", "Veuillez entrer des valeurs numériques valides.")
             return None
 
+    def display_convergence_graph(self):
+        values = self.get_input_values()
+        if values is not None:
+            S0, T, r, sigma, K, n = values
+            convergence_graph = ConvergenceGraph(S0, K, r, sigma, T)
+            N_values = np.arange(10, n + 101, 1)  # Ajustez la plage des valeurs N selon vos besoins
+            convergence_graph.plot_convergence_graph(N_values)
+
+
     def display_tree(self):
         """Fonction pour afficher l'arbre."""
         values = self.get_input_values()
         if values is not None:
-            S0, T, r, u, K, n = values
-            binomial_tree = BinomialTree(S0, T, r, u, K, n)
+            S0, T, r, sigma, K, n = values
+            binomial_tree = BinomialTree(S0, T, r, sigma, K, n)
             binomial_tree.build_stock_tree()
             binomial_tree.build_graph()
             binomial_tree.calculate_payoffs()
@@ -121,8 +134,8 @@ class BinomialTreeApp:
         """Calcul du prix du Put"""
         values = self.get_input_values()
         if values is not None:
-            S0, T, r, u, K, n = values
-            binomial_tree = BinomialTree(S0, T, r, u, K, n)
+            S0, T, r, sigma, K, n = values
+            binomial_tree = BinomialTree(S0, T, r, sigma, K, n)
             binomial_tree.build_stock_tree()
             binomial_tree.calculate_payoffs()
             put_value = binomial_tree.put_payoffs[0, 0]
@@ -132,8 +145,8 @@ class BinomialTreeApp:
         """Calcul du prix du Call"""
         values = self.get_input_values()
         if values is not None:
-            S0, T, r, u, K, n = values
-            binomial_tree = BinomialTree(S0, T, r, u, K, n)
+            S0, T, r, sigma, K, n = values
+            binomial_tree = BinomialTree(S0, T, r, sigma, K, n)
             binomial_tree.build_stock_tree()
             binomial_tree.calculate_payoffs()
             call_value = binomial_tree.call_payoffs[0, 0]
