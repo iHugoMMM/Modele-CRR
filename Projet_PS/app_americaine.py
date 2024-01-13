@@ -6,9 +6,9 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import decimal
 import numpy as np
 import matplotlib.pyplot as plt
-from binomiale_tree_amerique import BinomialTree
+from binomial_tree import BinomialTreeAM
 
-class BinomialTreeApp:
+class BinomialTreeAppAM:
     def __init__(self, root):
         self.root = root
         self.root.title("Modèle binomial | Calculateur d'options")
@@ -52,9 +52,9 @@ class BinomialTreeApp:
         self.r_entry = ttk.Entry(inputs_frame)
         self.r_entry.grid(row=2, column=1)
 
-        ttk.Label(inputs_frame, text="Sigma:").grid(row=3, column=0, sticky="w")
-        self.sigma_entry = ttk.Entry(inputs_frame)
-        self.sigma_entry.grid(row=3, column=1)
+        ttk.Label(inputs_frame, text="u:").grid(row=3, column=0, sticky="w")
+        self.u_entry = ttk.Entry(inputs_frame)
+        self.u_entry.grid(row=3, column=1)
 
         ttk.Label(inputs_frame, text="K:").grid(row=4, column=0, sticky="w")
         self.K_entry = ttk.Entry(inputs_frame)
@@ -86,61 +86,56 @@ class BinomialTreeApp:
         main_frame.rowconfigure(0, weight=1)
         main_frame.rowconfigure(1, weight=1)
 
-    def display_tree(self):
+    def get_input_values(self):
+        """Fonction pour obtenir les valeurs entrées par l'utilisateur."""
         try:
             S0 = float(self.S0_entry.get())
             T = float(self.T_entry.get())
             r = float(self.r_entry.get())
-            sigma = float(self.sigma_entry.get())
+            u = float(self.u_entry.get())
             K = float(self.K_entry.get())
             n = int(self.n_entry.get())
 
-            binomial_tree = BinomialTree(S0, T, r, sigma, K, n)
+            return S0, T, r, u, K, n
+
+        except ValueError:
+            messagebox.showerror("Erreur", "Veuillez entrer des valeurs numériques valides.")
+            return None
+
+    def display_tree(self):
+        """Fonction pour afficher l'arbre."""
+        values = self.get_input_values()
+        if values is not None:
+            S0, T, r, u, K, n = values
+            binomial_tree = BinomialTreeAM(S0, T, r, u, K, n)
             binomial_tree.build_stock_tree()
             binomial_tree.build_graph()
             binomial_tree.calculate_payoffs()
             binomial_tree.draw_tree()
 
-        except ValueError:
-            messagebox.showerror("Erreur", "Veuillez entrer des valeurs numériques valides.")
-
     def calculate_put(self):
-        try:
-            S0 = float(self.S0_entry.get())
-            T = float(self.T_entry.get())
-            r = float(self.r_entry.get())
-            sigma = float(self.sigma_entry.get())
-            K = float(self.K_entry.get())
-            n = int(self.n_entry.get())
-
-            binomial_tree = BinomialTree(S0, T, r, sigma, K, n)
+        """Calcul du prix du Put"""
+        values = self.get_input_values()
+        if values is not None:
+            S0, T, r, u, K, n = values
+            binomial_tree = BinomialTreeAM(S0, T, r, u, K, n)
             binomial_tree.build_stock_tree()
             binomial_tree.calculate_payoffs()
             put_value = binomial_tree.put_payoffs[0, 0]
             messagebox.showinfo("Put (t=0)", f"La valeur du Put à l'instant 0 est : {round(put_value, 2)}")
 
-        except ValueError:
-            messagebox.showerror("Erreur", "Veuillez entrer des valeurs numériques valides.")
-
     def calculate_call(self):
-        try:
-            S0 = float(self.S0_entry.get())
-            T = float(self.T_entry.get())
-            r = float(self.r_entry.get())
-            sigma = float(self.sigma_entry.get())
-            K = float(self.K_entry.get())
-            n = int(self.n_entry.get())
-
-            binomial_tree = BinomialTree(S0, T, r, sigma, K, n)
+        """Calcul du prix du Call"""
+        values = self.get_input_values()
+        if values is not None:
+            S0, T, r, u, K, n = values
+            binomial_tree = BinomialTreeAM(S0, T, r, u, K, n)
             binomial_tree.build_stock_tree()
             binomial_tree.calculate_payoffs()
             call_value = binomial_tree.call_payoffs[0, 0]
             messagebox.showinfo("Call (t=0)", f"La valeur du Call à l'instant 0 est : {round(call_value, 2)}")
 
-        except ValueError:
-            messagebox.showerror("Erreur", "Veuillez entrer des valeurs numériques valides.")
-
 if __name__ == "__main__":
     root = tk.Tk()
-    app = BinomialTreeApp(root)
+    app = BinomialTreeAppAM(root)
     root.mainloop()
