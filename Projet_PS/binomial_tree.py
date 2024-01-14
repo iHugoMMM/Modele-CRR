@@ -13,7 +13,7 @@ class BinomialTree:
         self.n = n
         self.u = np.exp(sigma * np.sqrt(T / n))
         self.d = 1 / self.u
-        self.p = (np.exp(r * T / n) - self.d) / (self.u - self.d) # Probabilité risque neutre
+        self.p = (np.exp(r * T / n) - self.d) / (self.u - self.d) # Probabilite risque neutre
         self.stock_tree = np.zeros((n + 1, n + 1))
         self.call_payoffs = np.zeros((n + 1, n + 1))
         self.put_payoffs = np.zeros((n + 1, n + 1))
@@ -59,11 +59,10 @@ class BinomialTree:
         for i in range(self.n + 1):
             for j in range(i + 1):
                 node_name = f"{i}, {j}"
-                self.node_labels[node_name] += f"\nC: {round(self.call_payoffs[j, i], 2)}\nP: {round(self.put_payoffs[j, i], 2)}"
+                self.node_labels[node_name] += f"\nCall: {round(self.call_payoffs[j, i], 2)}\nPut: {round(self.put_payoffs[j, i], 2)}"
 
         plt.figure(figsize=(8, 8))
-        nx.draw(self.G, self.pos, with_labels=False, node_size=1500, node_color='lightblue', edge_color='gray',
-                arrowsize=20)
+        nx.draw(self.G, self.pos, with_labels=False, node_size=1600, node_color='lightblue', edge_color='gray', arrowsize=15)
         nx.draw_networkx_labels(self.G, self.pos, labels=self.node_labels, font_size=10)
         ax = plt.gca()
         ax.spines['top'].set_visible(False)
@@ -76,8 +75,8 @@ class BinomialTree:
         division = decimal.Decimal(self.n) / decimal.Decimal(3)
         ax.text(division, 0.8, 'Nombre de hausses', ha='center', va='center')
         ax.text(-division, 0.8, 'Nombre de baisses', ha='center', va='center')
-        plt.title(f'Arbre binomial pour n={self.n} dans le cas d\'un call et put européens')
-        plt.xlabel('Nombre de périodes')
+        plt.title(f'Arbre binomial pour n={self.n} dans le cas d\'un call et put europeens')
+        plt.xlabel('Nombre de periodes')
         plt.ylabel('Variation de prix')
         plt.ylim(-self.n - 2.5, 1)
         plt.gca().invert_yaxis()
@@ -85,19 +84,16 @@ class BinomialTree:
         plt.show()
 
 class BinomialTreeAM:
-    def __init__(self, S0, T, r, u, K, n):
+    def __init__(self, S0, T, r, sigma, K, n):
         self.S0 = S0
         self.T = T
         self.r = r
-        # self.sigma = sigma
+        self.sigma = sigma
         self.K = K
         self.n = n
-        # self.u = np.exp(sigma * np.sqrt(T / n))
-        self.u = u
+        self.u = np.exp(sigma * np.sqrt(T / n))
         self.d = 1 / self.u
-        # avec sigma
-        # self.p = (np.exp(r * T / n) - self.d) / (self.u - self.d) # Probabilité risque neutre
-        self.p = (1 + self.r - self.d) / (self.u - self.d) # Probabilité risque neutre
+        self.p = (np.exp(r * T / n) - self.d) / (self.u - self.d) # Probabilite risque neutre
         self.stock_tree = np.zeros((n + 1, n + 1))
         self.call_payoffs = np.zeros((n + 1, n + 1))
         self.put_payoffs = np.zeros((n + 1, n + 1))
@@ -124,8 +120,8 @@ class BinomialTreeAM:
                     self.G.add_edge(node_name, f"{i + 1}, {j + 1}")
 
     def calculate_payoffs(self):
-        """'une option américaine peut être exercée à tout moment avant la date d'échéance 
-        si son prix intrinsèque est supérieur à la valeur de continuation."""
+        """'une option americaine peut etre exercee à tout moment avant la date d'echeance 
+        si son prix intrinseque est superieur à la valeur de continuation."""
         for i in range(self.n + 1):
             self.call_payoffs[i, self.n] = max(self.stock_tree[i, self.n] - self.K, 0)
             self.put_payoffs[i, self.n] = max(self.K - self.stock_tree[i, self.n], 0)
@@ -141,7 +137,7 @@ class BinomialTreeAM:
                 intrinsic_put = max(self.K - self.stock_tree[j, i], 0)
                 intrinsic_call = max(self.stock_tree[j, i] - self.K, 0)
 
-                # Comparez la valeur intrinsèque à la valeur de continuation (H)
+                # Comparez la valeur intrinseque à la valeur de continuation (H)
                 self.put_payoffs[j, i] = np.exp(-self.r * self.T / self.n) * (
                         self.p * intrinsic_put + (1 - self.p) * self.put_payoffs[j + 1, i + 1])
                 self.call_payoffs[j, i] = np.exp(-self.r * self.T / self.n) * (
@@ -168,8 +164,8 @@ class BinomialTreeAM:
         division = decimal.Decimal(self.n) / decimal.Decimal(3)
         ax.text(division, 0.8, 'Nombre de hausses', ha='center', va='center')
         ax.text(-division, 0.8, 'Nombre de baisses', ha='center', va='center')
-        plt.title(f'Arbre binomial pour n={self.n} dans le cas d\'un call et put européens')
-        plt.xlabel('Nombre de périodes')
+        plt.title(f'Arbre binomial pour n={self.n} dans le cas d\'un call et put europeens')
+        plt.xlabel('Nombre de periodes')
         plt.ylabel('Variation de prix')
         plt.ylim(-self.n - 2.5, 1)
         plt.gca().invert_yaxis()
@@ -198,13 +194,13 @@ class ConvergenceGraph:
             for j in range(i+1):
                 stock_prices[j, i] = self.S0 * (u ** (i-j)) * (d ** j)
 
-        # Calcul des prix de l'option à l'échéance
+        # Calcul des prix de l'option à l'echeance
         if option_type == 'call':
             option_prices[:, N] = np.maximum(stock_prices[:, N] - self.K, 0)
         elif option_type == 'put':
             option_prices[:, N] = np.maximum(self.K - stock_prices[:, N], 0)
 
-        # Calcul récursif des prix de l'option du dernier nœud à l'instant initial
+        # Calcul recursif des prix de l'option du dernier nœud à l'instant initial
         for i in range(N-1, -1, -1):
             for j in range(i+1):
                 option_prices[j, i] = np.exp(-self.r * dt) * (p * option_prices[j, i+1] + (1 - p) * option_prices[j+1, i+1])
@@ -214,23 +210,23 @@ class ConvergenceGraph:
     def plot_convergence_graph(self, N_values, option_type='call'):
         crr_prices = [self.crr_option_price(N, option_type) for N in N_values]
 
-        # Tracé du graphique de convergence
+        # Trace du graphique de convergence
         option_name = 'Call' if option_type == 'call' else 'Put'
-        plt.plot(N_values, crr_prices, label=f'Modèle CRR - {option_name}')
-        plt.xlabel('Nombre de périodes (N)')
+        plt.plot(N_values, crr_prices, label=f'Modele CRR - {option_name}')
+        plt.xlabel('Nombre de periodes (N)')
         plt.ylabel(f'Prix de l\'option {option_name}')
-        plt.title(f'Convergence du modèle CRR pour {option_name}')
+        plt.title(f'Convergence du modele CRR pour {option_name}')
         plt.legend()
         plt.show()
 
     def plot_convergence_graph_put(self, N_values, option_type='put'):
         crr_prices = [self.crr_option_price(N, option_type) for N in N_values]
 
-        # Tracé du graphique de convergence
+        # Trace du graphique de convergence
         option_name = 'Call' if option_type == 'call' else 'Put'
-        plt.plot(N_values, crr_prices, label=f'Modèle CRR - {option_name}')
-        plt.xlabel('Nombre de périodes (N)')
+        plt.plot(N_values, crr_prices, label=f'Modele CRR - {option_name}')
+        plt.xlabel('Nombre de periodes (N)')
         plt.ylabel(f'Prix de l\'option {option_name}')
-        plt.title(f'Convergence du modèle CRR pour {option_name}')
+        plt.title(f'Convergence du modele CRR pour {option_name}')
         plt.legend()
         plt.show()

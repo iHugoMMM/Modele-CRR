@@ -7,24 +7,28 @@ import decimal
 import numpy as np
 import matplotlib.pyplot as plt
 from binomial_tree import BinomialTreeAM
+from binomial_tree import ConvergenceGraph
 
 class BinomialTreeAppAM:
+    """Classe principale de l'application. 
+    Calcul du prix d'une option europeenne à l'aide du modele binomial de Cox-Ross-Rubinstein."""
     def __init__(self, root):
+        """Fonction init, cree la fenetre principale et les widgets."""
         self.root = root
-        self.root.title("Modèle binomial | Calculateur d'options")
+        self.root.title("Modele binomial | Calculateur d'options")
 
-        # Obtenez les dimensions de l'écran
+        # Obtenez les dimensions de l'ecran
         screen_width = root.winfo_screenwidth()
         screen_height = root.winfo_screenheight()
 
-        # Calculez les coordonnées x et y pour centrer la fenêtre
-        x = (screen_width - 800) // 2  # Ajustez la largeur de la fenêtre selon vos besoins
-        y = (screen_height - 600) // 2  # Ajustez la hauteur de la fenêtre selon vos besoins
+        # Calculez les coordonnees x et y pour centrer la fenetre
+        x = (screen_width - 800) // 2  # Ajustez la largeur de la fenetre selon vos besoins
+        y = (screen_height - 600) // 2  # Ajustez la hauteur de la fenetre selon vos besoins
 
-        # Définissez la géométrie de la fenêtre
-        self.root.geometry(f"300x300+{x}+{y}")
+        # Definissez la geometrie de la fenetre
+        self.root.geometry(f"345x285+{x}+{y}")
 
-        # Configurez la couleur de fond de la fenêtre principale
+        # Configurez la couleur de fond de la fenetre principale
         style = ttk.Style()
         style.configure("TFrame", background="#1E213D")  # Valeurs RGB (30, 33, 61)
         self.root.configure(bg="#1E213D")  # Configurez la couleur de fond de la racine
@@ -32,6 +36,7 @@ class BinomialTreeAppAM:
         self.create_widgets()
 
     def create_widgets(self):
+        """Fonctions pour creer les widgets de la fenetre."""
         # Frame principale
         main_frame = ttk.Frame(self.root)
         main_frame.grid(row=0, column=0, sticky="nsew")
@@ -52,9 +57,9 @@ class BinomialTreeAppAM:
         self.r_entry = ttk.Entry(inputs_frame)
         self.r_entry.grid(row=2, column=1)
 
-        ttk.Label(inputs_frame, text="u:").grid(row=3, column=0, sticky="w")
-        self.u_entry = ttk.Entry(inputs_frame)
-        self.u_entry.grid(row=3, column=1)
+        ttk.Label(inputs_frame, text="sigma:").grid(row=3, column=0, sticky="w")
+        self.sigma_entry = ttk.Entry(inputs_frame)
+        self.sigma_entry.grid(row=3, column=1)
 
         ttk.Label(inputs_frame, text="K:").grid(row=4, column=0, sticky="w")
         self.K_entry = ttk.Entry(inputs_frame)
@@ -77,37 +82,85 @@ class BinomialTreeAppAM:
         # Bouton pour calculer le Call
         ttk.Button(buttons_frame, text="Calcul : Call", command=self.calculate_call).grid(row=2, column=0, pady=(5, 0))
 
-        # Quart inférieur gauche: Arbre
+        # Bouton pour afficher le graphique de convergence du Call
+        ttk.Button(buttons_frame, text="Afficher Convergence Call", command=self.display_convergence_graph).grid(row=3, column=0, pady=(5, 0))
+
+        # Bouton pour afficher le graphique de convergence du Put
+        ttk.Button(buttons_frame, text="Afficher Convergence Put", command=self.display_convergence_graph_put).grid(row=4, column=0, pady=(5, 0))
+
+        # Bouton pour afficher le graphique complet de convergence
+        ttk.Button(buttons_frame, text="Graph complet", command=self.display_full_convergence_graph).grid(row=5, column=0, pady=(5, 0))
+
+        # Quart inferieur gauche: Arbre
         tree_frame = ttk.Frame(main_frame)
         tree_frame.grid(row=1, column=0, sticky="nsew")
 
-        # Ajustement des poids pour que les parties de la fenêtre s'ajustent en taille
+        # Ajustement des poids pour que les parties de la fenetre s'ajustent en taille
         main_frame.columnconfigure(0, weight=1)
         main_frame.rowconfigure(0, weight=1)
         main_frame.rowconfigure(1, weight=1)
 
     def get_input_values(self):
-        """Fonction pour obtenir les valeurs entrées par l'utilisateur."""
+        """Fonction pour obtenir les valeurs entrees par l'utilisateur."""
         try:
             S0 = float(self.S0_entry.get())
             T = float(self.T_entry.get())
             r = float(self.r_entry.get())
-            u = float(self.u_entry.get())
+            sigma = float(self.sigma_entry.get())
             K = float(self.K_entry.get())
             n = int(self.n_entry.get())
 
-            return S0, T, r, u, K, n
+            return S0, T, r, sigma, K, n
 
         except ValueError:
-            messagebox.showerror("Erreur", "Veuillez entrer des valeurs numériques valides.")
+            messagebox.showerror("Erreur", "Veuillez entrer des valeurs numeriques valides.")
             return None
+
+    def display_convergence_graph(self):
+        values = self.get_input_values()
+        if values is not None:
+            S0, T, r, sigma, K, n = values
+            convergence_graph = ConvergenceGraph(S0, K, r, sigma, T)
+            N_values = np.arange(10, n + 101, 1) 
+            convergence_graph.plot_convergence_graph(N_values)
+
+    def display_convergence_graph_put(self):
+        values = self.get_input_values()
+        if values is not None:
+            S0, T, r, sigma, K, n = values
+            convergence_graph_put = ConvergenceGraph(S0, K, r, sigma, T)
+            N_values = np.arange(10, n + 101, 1) 
+            convergence_graph_put.plot_convergence_graph_put(N_values)
+
+    def display_full_convergence_graph(self):
+        values = self.get_input_values()
+        if values is not None:
+            S0, T, r, sigma, K, n = values
+            convergence_graph = ConvergenceGraph(S0, K, r, sigma, T)
+
+            N_values = np.arange(10, n + 101, 1)
+            
+            # Calcul de la convergence pour le Call
+            call_prices = [convergence_graph.crr_option_price(N, 'call') for N in N_values]
+
+            # Calcul de la convergence pour le Put
+            put_prices = [convergence_graph.crr_option_price(N, 'put') for N in N_values]
+
+            # Trace du graphique de convergence complet
+            plt.plot(N_values, call_prices, label='Convergence Call')
+            plt.plot(N_values, put_prices, label='Convergence Put')
+            plt.xlabel('Nombre de periodes (N)')
+            plt.ylabel('Prix de l\'option')
+            plt.title('Convergence du modele CRR pour Call et Put')
+            plt.legend()
+            plt.show()
 
     def display_tree(self):
         """Fonction pour afficher l'arbre."""
         values = self.get_input_values()
         if values is not None:
-            S0, T, r, u, K, n = values
-            binomial_tree = BinomialTreeAM(S0, T, r, u, K, n)
+            S0, T, r, sigma, K, n = values
+            binomial_tree = BinomialTreeAM(S0, T, r, sigma, K, n)
             binomial_tree.build_stock_tree()
             binomial_tree.build_graph()
             binomial_tree.calculate_payoffs()
@@ -117,8 +170,8 @@ class BinomialTreeAppAM:
         """Calcul du prix du Put"""
         values = self.get_input_values()
         if values is not None:
-            S0, T, r, u, K, n = values
-            binomial_tree = BinomialTreeAM(S0, T, r, u, K, n)
+            S0, T, r, sigma, K, n = values
+            binomial_tree = BinomialTreeAM(S0, T, r, sigma, K, n)
             binomial_tree.build_stock_tree()
             binomial_tree.calculate_payoffs()
             put_value = binomial_tree.put_payoffs[0, 0]
@@ -128,8 +181,8 @@ class BinomialTreeAppAM:
         """Calcul du prix du Call"""
         values = self.get_input_values()
         if values is not None:
-            S0, T, r, u, K, n = values
-            binomial_tree = BinomialTreeAM(S0, T, r, u, K, n)
+            S0, T, r, sigma, K, n = values
+            binomial_tree = BinomialTreeAM(S0, T, r, sigma, K, n)
             binomial_tree.build_stock_tree()
             binomial_tree.calculate_payoffs()
             call_value = binomial_tree.call_payoffs[0, 0]

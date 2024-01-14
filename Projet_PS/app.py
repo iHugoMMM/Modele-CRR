@@ -11,24 +11,24 @@ from binomial_tree import ConvergenceGraph
 
 class BinomialTreeApp:
     """Classe principale de l'application. 
-    Calcul du prix d'une option européenne à l'aide du modèle binomial de Cox-Ross-Rubinstein."""
+    Calcul du prix d'une option europeenne à l'aide du modele binomial de Cox-Ross-Rubinstein."""
     def __init__(self, root):
-        """Fonction init, crée la fenêtre principale et les widgets."""
+        """Fonction init, cree la fenetre principale et les widgets."""
         self.root = root
-        self.root.title("Modèle binomial | Calculateur d'options")
+        self.root.title("Modele binomial | Calculateur d'options")
 
-        # Obtenez les dimensions de l'écran
+        # Obtenez les dimensions de l'ecran
         screen_width = root.winfo_screenwidth()
         screen_height = root.winfo_screenheight()
 
-        # Calculez les coordonnées x et y pour centrer la fenêtre
-        x = (screen_width - 800) // 2  # Ajustez la largeur de la fenêtre selon vos besoins
-        y = (screen_height - 600) // 2  # Ajustez la hauteur de la fenêtre selon vos besoins
+        # Calculez les coordonnees x et y pour centrer la fenetre
+        x = (screen_width - 800) // 2  # Ajustez la largeur de la fenetre selon vos besoins
+        y = (screen_height - 600) // 2  # Ajustez la hauteur de la fenetre selon vos besoins
 
-        # Définissez la géométrie de la fenêtre
+        # Definissez la geometrie de la fenetre
         self.root.geometry(f"345x285+{x}+{y}")
 
-        # Configurez la couleur de fond de la fenêtre principale
+        # Configurez la couleur de fond de la fenetre principale
         style = ttk.Style()
         style.configure("TFrame", background="#1E213D")  # Valeurs RGB (30, 33, 61)
         self.root.configure(bg="#1E213D")  # Configurez la couleur de fond de la racine
@@ -36,7 +36,7 @@ class BinomialTreeApp:
         self.create_widgets()
 
     def create_widgets(self):
-        """Fonctions pour créer les widgets de la fenêtre."""
+        """Fonctions pour creer les widgets de la fenetre."""
         # Frame principale
         main_frame = ttk.Frame(self.root)
         main_frame.grid(row=0, column=0, sticky="nsew")
@@ -77,10 +77,10 @@ class BinomialTreeApp:
         ttk.Button(buttons_frame, text="Afficher l'arbre", command=self.display_tree).grid(row=0, column=0, pady=(0, 10))
 
         # Bouton pour calculer le Put
-        ttk.Button(buttons_frame, text="Calcul : Put", command=self.calculate_put).grid(row=1, column=0, pady=5)
+        ttk.Button(buttons_frame, text="Calcul : Put", command=self.calculate_put).grid(row=2, column=0, pady=5)
 
         # Bouton pour calculer le Call
-        ttk.Button(buttons_frame, text="Calcul : Call", command=self.calculate_call).grid(row=2, column=0, pady=(5, 0))
+        ttk.Button(buttons_frame, text="Calcul : Call", command=self.calculate_call).grid(row=1, column=0, pady=(5, 0))
 
         # Bouton pour afficher le graphique de convergence du Call
         ttk.Button(buttons_frame, text="Afficher Convergence Call", command=self.display_convergence_graph).grid(row=3, column=0, pady=(5, 0))
@@ -91,17 +91,17 @@ class BinomialTreeApp:
         # Bouton pour afficher le graphique complet de convergence
         ttk.Button(buttons_frame, text="Graph complet", command=self.display_full_convergence_graph).grid(row=5, column=0, pady=(5, 0))
 
-        # Quart inférieur gauche: Arbre
+        # Quart inferieur gauche: Arbre
         tree_frame = ttk.Frame(main_frame)
         tree_frame.grid(row=1, column=0, sticky="nsew")
 
-        # Ajustement des poids pour que les parties de la fenêtre s'ajustent en taille
+        # Ajustement des poids pour que les parties de la fenetre s'ajustent en taille
         main_frame.columnconfigure(0, weight=1)
         main_frame.rowconfigure(0, weight=1)
         main_frame.rowconfigure(1, weight=1)
 
     def get_input_values(self):
-        """Fonction pour obtenir les valeurs entrées par l'utilisateur."""
+        """Fonction pour obtenir les valeurs entrees par l'utilisateur."""
         try:
             S0 = float(self.S0_entry.get())
             T = float(self.T_entry.get())
@@ -113,7 +113,7 @@ class BinomialTreeApp:
             return S0, T, r, sigma, K, n
 
         except ValueError:
-            messagebox.showerror("Erreur", "Veuillez entrer des valeurs numériques valides.")
+            messagebox.showerror("Erreur", "Veuillez entrer des valeurs numeriques valides.")
             return None
 
     def display_convergence_graph(self):
@@ -121,7 +121,7 @@ class BinomialTreeApp:
         if values is not None:
             S0, T, r, sigma, K, n = values
             convergence_graph = ConvergenceGraph(S0, K, r, sigma, T)
-            N_values = np.arange(10, n + 101, 1) 
+            N_values = np.arange(10, n + 201, 1) 
             convergence_graph.plot_convergence_graph(N_values)
 
     def display_convergence_graph_put(self):
@@ -129,7 +129,7 @@ class BinomialTreeApp:
         if values is not None:
             S0, T, r, sigma, K, n = values
             convergence_graph_put = ConvergenceGraph(S0, K, r, sigma, T)
-            N_values = np.arange(10, n + 101, 1) 
+            N_values = np.arange(10, n + 201, 1) 
             convergence_graph_put.plot_convergence_graph_put(N_values)
 
     def display_full_convergence_graph(self):
@@ -138,7 +138,7 @@ class BinomialTreeApp:
             S0, T, r, sigma, K, n = values
             convergence_graph = ConvergenceGraph(S0, K, r, sigma, T)
 
-            N_values = np.arange(10, n + 101, 1)
+            N_values = np.arange(10, n + 201, 1)
             
             # Calcul de la convergence pour le Call
             call_prices = [convergence_graph.crr_option_price(N, 'call') for N in N_values]
@@ -146,12 +146,12 @@ class BinomialTreeApp:
             # Calcul de la convergence pour le Put
             put_prices = [convergence_graph.crr_option_price(N, 'put') for N in N_values]
 
-            # Tracé du graphique de convergence complet
+            # Trace du graphique de convergence complet
             plt.plot(N_values, call_prices, label='Convergence Call')
             plt.plot(N_values, put_prices, label='Convergence Put')
-            plt.xlabel('Nombre de périodes (N)')
+            plt.xlabel('Nombre de periodes (N)')
             plt.ylabel('Prix de l\'option')
-            plt.title('Convergence du modèle CRR pour Call et Put')
+            plt.title('Convergence du modele CRR pour Call et Put')
             plt.legend()
             plt.show()
 
