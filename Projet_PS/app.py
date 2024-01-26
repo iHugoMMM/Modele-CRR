@@ -103,13 +103,12 @@ class BinomialTreeApp:
     def get_input_values(self):
         """Fonction pour obtenir les valeurs entrees par l'utilisateur."""
         try:
-            S0 = float(self.S0_entry.get())
-            T = float(self.T_entry.get())
-            r = float(self.r_entry.get())
-            sigma = float(self.sigma_entry.get())
-            K = float(self.K_entry.get())
+            S0 = round(float(self.S0_entry.get()), 3)
+            T = round(float(self.T_entry.get()), 3)
+            r = round(float(self.r_entry.get()), 3)
+            sigma = round(float(self.sigma_entry.get()), 3)
+            K = round(float(self.K_entry.get()), 3)
             n = int(self.n_entry.get())
-
             return S0, T, r, sigma, K, n
 
         except ValueError:

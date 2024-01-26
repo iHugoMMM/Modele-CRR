@@ -20,6 +20,8 @@ class BinomialTree:
         self.G = nx.DiGraph()
         self.pos = {}
         self.node_labels = {}
+        print("u =",self.u)
+        print("d =",self.d)
 
     def build_stock_tree(self):
         self.stock_tree[0, 0] = self.S0
